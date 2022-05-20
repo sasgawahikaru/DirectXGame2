@@ -1,6 +1,7 @@
 ﻿#include "GameScene.h"
 #include "TextureManager.h"
 #include <cassert>
+#include <random>
 
 using namespace DirectX;
 
@@ -9,8 +10,8 @@ GameScene::GameScene() {}
 
 //デストラクタ
 GameScene::~GameScene() {
-	 delete sprite_;
-	 delete model_;
+	delete sprite_;
+	delete model_;
 }
 
 void GameScene::Initialize() {
@@ -29,17 +30,30 @@ void GameScene::Initialize() {
 
 	model_ = Model::Create();
 
-	worldTransform_.Initialize();
+	//乱数シード生成
+	std::random_device seed_gen;
+	//メルセンヌ
+	std::mt19937_64 engine(seed_gen());
+	//乱数範囲回転
+	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
+	//乱数範囲座標
+	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		// XYZ　スケーリング
+		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
+		// XYZ　回転角
+		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
+		// XYZ　平行移動
+		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+		//初期化
+		worldTransform_[i].Initialize();
+	}
+	viewProjection_.target = {10, 0, 0};
+
+	viewProjection_.up = {cosf(XM_PI / 4.0f), sinf(XM_PI / 4.0f), 0.0f};
+	///	viewProjection_.eye = {0, 0, -10};
 	viewProjection_.Initialize();
-
-	worldTransform_.scale_ = {5.0f, 5.0f, 5.0f};
-	worldTransform_.Initialize();
-
-	worldTransform_.rotation_ = {XM_PI / 4.0f, XM_PI / 4.0f, 0.0f};
-	worldTransform_.Initialize();
-
-	worldTransform_.translation_ = {10.0f, 10.0f, 10.0f};
-	worldTransform_.Initialize();
 }
 //更新
 void GameScene::Update() {
@@ -48,24 +62,82 @@ void GameScene::Update() {
 		audio_->StopWave(voiceHandle_);
 
 	//	debugText_->Print("ikisugii 19 19", 50, 50, 1.0f);
+	//	debugText_->SetPos(50, 70);
+	//	debugText_->Printf("year:%d", 2001);
+
+	value_++;
+
+	std::string strDebug = std::string("value") + std::to_string(value_);
+
+	//	debugText_->Print(strDebug, 50, 50, 1.0f);
+
+	//視点移動処理
+	{
+		//視点の移動ベクトル
+		XMFLOAT3 move = {0, 0, 0};
+
+		const float kEyeSpeed = 0.2f;
+
+		if (input_->PushKey(DIK_W)) {
+			move = {0, 0, kEyeSpeed};
+		} else if (input_->PushKey(DIK_S)) {
+			move = {0, 0, -kEyeSpeed};
+		}
+		//視点移動
+		viewProjection_.eye.x += move.x;
+		viewProjection_.eye.y += move.y;
+		viewProjection_.eye.z += move.z;
+		//行列
+		viewProjection_.UpdateMatrix();
+		//デバッグ
+		debugText_->SetPos(50, 50);
+		debugText_->Printf(
+		  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y, viewProjection_.eye.z);
+	}
+	//視点移動処理
+	{
+		//視点の移動ベクトル
+		XMFLOAT3 move = {0, 0, 0};
+
+		//注視点の速さ
+		const float kTargetSpeed = 0.2f;
+		//押した方向でベク変
+		if (input_->PushKey(DIK_LEFT)) {
+			move = {-kTargetSpeed, 0, 0};
+		} else if (input_->PushKey(DIK_RIGHT)) {
+			move = {kTargetSpeed, 0, 0};
+		}
+		//視点移動
+		viewProjection_.target.x += move.x;
+		viewProjection_.target.y += move.y;
+		viewProjection_.target.z += move.z;
+		//行列
+		viewProjection_.UpdateMatrix();
+		//デバッグ
 		debugText_->SetPos(50, 70);
-	debugText_->Printf(
-	  "translation:(%f,%f,%f)",
-	  worldTransform_.translation_.x,worldTransform_.translation_.y,worldTransform_.translation_.z);
-	    debugText_->SetPos(50, 90);
-	debugText_->Printf(
-	  "rotation:(%f,%f,%f)", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
-	  worldTransform_.rotation_.z);
-	    debugText_->SetPos(50, 110);
-	debugText_->Printf(
-	  "scale:(%f,%f,%f)", worldTransform_.scale_.x, worldTransform_.scale_.y,
-	  worldTransform_.scale_.z);
-
-//	value_++;
-
-//	std::string strDebug = std::string("value") + std::to_string(value_);
-
-//	debugText_->Print(strDebug, 50, 50, 1.0f);
+		debugText_->Printf(
+		  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
+		  viewProjection_.target.z);
+	}
+	//上方向回転処理
+	{
+		//上方向の回転の速さ
+		const float kUpRotSpeed = 0.05f;
+	//
+		if (input_->PushKey(DIK_SPACE)) {
+			viewAngle += kUpRotSpeed;
+			//2πを戻す
+			viewAngle = fmodf(viewAngle, XM_2PI);
+		}
+	//上方向ベクトル計算
+		viewProjection_.up = {cosf(viewAngle), sinf(viewAngle), 0.0f};
+	//行列の再計算
+		viewProjection_.UpdateMatrix();
+		debugText_->SetPos(50, 90);
+		debugText_->Printf(
+		  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y,
+		  viewProjection_.up.z);
+	}
 }
 
 void GameScene::Draw() {
@@ -94,9 +166,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-
-	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
-
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
