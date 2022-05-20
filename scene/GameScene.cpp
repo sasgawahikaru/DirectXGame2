@@ -9,8 +9,8 @@ GameScene::GameScene() {}
 
 //デストラクタ
 GameScene::~GameScene() {
-	// delete sprite_;
-	// delete model_;
+	 delete sprite_;
+	 delete model_;
 }
 
 void GameScene::Initialize() {
@@ -48,14 +48,24 @@ void GameScene::Update() {
 		audio_->StopWave(voiceHandle_);
 
 	//	debugText_->Print("ikisugii 19 19", 50, 50, 1.0f);
-	//	debugText_->SetPos(50, 70);
-	//	debugText_->Printf("year:%d", 2001);
+		debugText_->SetPos(50, 70);
+	debugText_->Printf(
+	  "translation:(%f,%f,%f)",
+	  worldTransform_.translation_.x,worldTransform_.translation_.y,worldTransform_.translation_.z);
+	    debugText_->SetPos(50, 90);
+	debugText_->Printf(
+	  "rotation:(%f,%f,%f)", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
+	  worldTransform_.rotation_.z);
+	    debugText_->SetPos(50, 110);
+	debugText_->Printf(
+	  "scale:(%f,%f,%f)", worldTransform_.scale_.x, worldTransform_.scale_.y,
+	  worldTransform_.scale_.z);
 
-	value_++;
+//	value_++;
 
-	std::string strDebug = std::string("value") + std::to_string(value_);
+//	std::string strDebug = std::string("value") + std::to_string(value_);
 
-	debugText_->Print(strDebug, 50, 50, 1.0f);
+//	debugText_->Print(strDebug, 50, 50, 1.0f);
 }
 
 void GameScene::Draw() {
