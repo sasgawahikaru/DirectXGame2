@@ -98,10 +98,10 @@ void GameScene::Update() {
 	//行列
 	//		viewProjection_.UpdateMatrix();
 	//デバッグ
-	//		debugText_->SetPos(50, 50);
-	//		debugText_->Printf(
-	//		  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y,
-	//viewProjection_.eye.z);
+			debugText_->SetPos(50, 50);
+			debugText_->Printf(
+			  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y,
+	viewProjection_.eye.z);
 	//	}
 	//視点移動処理
 	//	{
@@ -123,10 +123,10 @@ void GameScene::Update() {
 	//行列
 	//		viewProjection_.UpdateMatrix();
 	//デバッグ
-	//		debugText_->SetPos(50, 70);
-	//		debugText_->Printf(
-	//		  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
-	//		  viewProjection_.target.z);
+			debugText_->SetPos(50, 70);
+			debugText_->Printf(
+			  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
+			  viewProjection_.target.z);
 	//	}
 	//上方向回転処理
 	//	{
@@ -141,26 +141,26 @@ void GameScene::Update() {
 	//上方向ベクトル計算
 	//		viewProjection_.up = {cosf(viewAngle), sinf(viewAngle), 0.0f};
 	//行列の再計算
-	//		viewProjection_.UpdateMatrix();
-	//		debugText_->SetPos(50, 90);
-	//		debugText_->Printf(
-	//		  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y,
-	//		  viewProjection_.up.z);
-	//	}
+//			viewProjection_.UpdateMatrix();
+			debugText_->SetPos(50, 90);
+			debugText_->Printf(
+			  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y,
+			  viewProjection_.up.z);
+//		}
 	// for変更処理
-//	{
-//		if (input_->PushKey(DIK_UP)) {
-//			viewProjection_.fovAngleY += 0.01f;
-//			viewProjection_.fovAngleY = min(viewProjection_.fovAngleY, XM_PI);
-//	} else if (input_->PushKey(DIK_DOWN)){
-//			viewProjection_.fovAngleY -= 0.01f;
-//			viewProjection_.fovAngleY = max(viewProjection_.fovAngleY, 0.01f);
-//	}
-//	viewProjection_.UpdateMatrix();
+	{
+		if (input_->PushKey(DIK_W)) {
+			viewProjection_.fovAngleY += 0.01f;
+			viewProjection_.fovAngleY = min(viewProjection_.fovAngleY, XM_PI);
+	} else if (input_->PushKey(DIK_S)){
+			viewProjection_.fovAngleY -= 0.01f;
+			viewProjection_.fovAngleY = max(viewProjection_.fovAngleY, 0.01f);
+	}
+	viewProjection_.UpdateMatrix();
 
-//		debugText_->SetPos(50,110);
-//		debugText_->Printf("fovAngleY(Degree):%f",XMConvertToDegrees(viewProjection_.fovAngleY));
-//	}
+		debugText_->SetPos(50,110);
+		debugText_->Printf("fovAngleY(Degree):%f",XMConvertToDegrees(viewProjection_.fovAngleY));
+	}
 
 	{
 		if (input_->PushKey(DIK_UP)) {
@@ -170,7 +170,7 @@ void GameScene::Update() {
 		}
 		viewProjection_.UpdateMatrix();
 
-		debugText_->SetPos(50, 110);
+		debugText_->SetPos(50, 130);
 		debugText_->Printf("nearZ:%f",(viewProjection_.nearZ));
 	}
 }
